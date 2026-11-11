@@ -1,4 +1,5 @@
-"""Zero-shot (no training) CLIP retrieval on one split of one indexed dataset.
+"""Retrieval evaluation on one split of one indexed dataset: zero-shot CLIP, or a fine-tuned
+checkpoint with --checkpoint (also used for cross-dataset transfer).
 
     python eval/zero_shot.py --index data/rsicd/index.jsonl --split test --out results/zeroshot_rsicd_test
 
@@ -22,6 +23,7 @@ def main():
     p.add_argument("--split", default="test")
     p.add_argument("--model", default="ViT-B-32-quickgelu")
     p.add_argument("--pretrained", default="openai")
+    p.add_argument("--checkpoint", default=None, help="fine-tuned weights from train/train_clip.py (omit = zero-shot)")
     p.add_argument("--batch-size", type=int, default=128)
     p.add_argument("--workers", type=int, default=4)
     p.add_argument("--out", required=True)
@@ -34,7 +36,7 @@ def main():
     texts, txt_to_img = flatten_captions(records)
     print(f"{len(records)} images, {len(texts)} captions ({args.split})")
 
-    model, preprocess, tokenizer, device = load_clip(args.model, args.pretrained)
+    model, preprocess, tokenizer, device = load_clip(args.model, args.pretrained, checkpoint=args.checkpoint)
     print(f"model {args.model}/{args.pretrained} on {device}")
     t0 = time.perf_counter()
     img = encode_images(model, preprocess, records, root, device, args.batch_size, args.workers)
@@ -42,7 +44,7 @@ def main():
     print(f"encoded in {time.perf_counter() - t0:.1f}s")
 
     sim = (img @ txt.T).numpy()
-    result = {"model": args.model, "pretrained": args.pretrained, "index": args.index, "split": args.split,
+    result = {"model": args.model, "pretrained": args.pretrained, "checkpoint": args.checkpoint, "index": args.index, "split": args.split,
               "n_images": len(records), "n_captions": len(texts),
               "overall": evaluate(sim, txt_to_img)}
     scenes = [r["scene"] for r in records]

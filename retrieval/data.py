@@ -39,3 +39,32 @@ class ImageDataset:
         from PIL import Image
         with Image.open(self.paths[i]) as im:
             return self.transform(im.convert("RGB"))
+
+
+class TrainPairs:
+    """One (image, caption) pair per image per epoch: a random one of its captions.
+    Because a batch is made of DISTINCT images with one caption each, no caption in the batch is a
+    hidden positive for another image (no false negatives from the same image's other captions).
+    Augmentation (aerial images have no canonical orientation): random flips and 90-degree rotations."""
+
+    def __init__(self, records, root, transform, augment=True):
+        self.records, self.root, self.transform, self.augment = records, Path(root), transform, augment
+
+    def __len__(self):
+        return len(self.records)
+
+    def __getitem__(self, i):
+        import random
+        from PIL import Image
+        r = self.records[i]
+        with Image.open(self.root / r["image"]) as im:
+            im = im.convert("RGB")
+        if self.augment:
+            if random.random() < 0.5:
+                im = im.transpose(Image.FLIP_LEFT_RIGHT)
+            if random.random() < 0.5:
+                im = im.transpose(Image.FLIP_TOP_BOTTOM)
+            k = random.randint(0, 3)
+            if k:
+                im = im.transpose((Image.ROTATE_90, Image.ROTATE_180, Image.ROTATE_270)[k - 1])
+        return self.transform(im), random.choice(r["captions"])

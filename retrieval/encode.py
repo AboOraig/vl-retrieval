@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from .data import ImageDataset
 
 
-def load_clip(name="ViT-B-32", pretrained="openai", device=None):
+def load_clip(name="ViT-B-32", pretrained="openai", device=None, checkpoint=None):
     import open_clip
     # The original OpenAI weights were trained with QuickGELU; loading them into the plain
     # architecture silently degrades the embeddings (open_clip only warns). Use the matching config.
@@ -15,6 +15,8 @@ def load_clip(name="ViT-B-32", pretrained="openai", device=None):
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
     model, _, preprocess = open_clip.create_model_and_transforms(name, pretrained=pretrained)
     tokenizer = open_clip.get_tokenizer(name)
+    if checkpoint:
+        model.load_state_dict(torch.load(checkpoint, map_location="cpu"))
     return model.to(device).eval(), preprocess, tokenizer, device
 
 
