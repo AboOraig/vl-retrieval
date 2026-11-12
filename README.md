@@ -15,6 +15,7 @@ eval/        zero_shot.py (any split), per_scene.py, transfer.py (cross-dataset)
 analysis/    check/figure/table scripts (per_scene_report.py, make_tables.py)
 tools/       inspect_dataset.py, check_overlap.py (near-duplicate / leakage check)
 tests/       python tests/test_basics.py   (metric sanity checks)
+paper/       short technical report on this study
 ```
 
 ## Setup 
