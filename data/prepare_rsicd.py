@@ -1,4 +1,4 @@
-"""Build a clean index of RSICD: one JSON line per image (path, split, captions, scene class).
+"""Build a clean index of RSICD (also RSITMD / UCM-Captions, same JSON format; use --name and --annotations): one JSON line per image (path, split, captions, scene class).
 
 Usage:
     python data/prepare_rsicd.py --root D:\\datasets\\RSICD --out data/rsicd/index.jsonl
@@ -81,7 +81,7 @@ def scene_of(fname):
     return m.group(1) if m else None
 
 
-def build_index(root, annotations, out, random_split=False, seed=0):
+def build_index(root, annotations, out, random_split=False, seed=0, name="rsicd"):
     root, out = Path(root).resolve(), Path(out)
     ann_path = Path(annotations) if annotations else root / "dataset_rsicd.json"
     if not ann_path.exists():
@@ -117,7 +117,7 @@ def build_index(root, annotations, out, random_split=False, seed=0):
             rel = images[fname].relative_to(root).as_posix()
             fh.write(json.dumps({"image": rel, "split": split, "captions": captions, "scene": scene},
                                 ensure_ascii=False) + "\n")
-    meta = {"root": str(root), "dataset": "rsicd", "n_images": len(parsed), "annotations": ann_path.name}
+    meta = {"root": str(root), "dataset": name, "n_images": len(parsed), "annotations": ann_path.name}
     out.with_name(out.stem + ".meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
 
     n_caps = Counter(len(c) for _, _, c in parsed)
@@ -126,10 +126,10 @@ def build_index(root, annotations, out, random_split=False, seed=0):
     cls = Counter(s for s in scenes if s)
     if cls:
         print(f"{len(cls)} scene classes: " + ", ".join(f"{k}({v})" for k, v in sorted(cls.items())))
-    if len(parsed) != 10921:
+    if name == "rsicd" and len(parsed) != 10921:
         print(f"NOTE: the RSICD release has 10,921 images; this index has {len(parsed)}.")
     if set(n_caps) != {5}:
-        print("NOTE: RSICD is documented as 5 captions per image; check the distribution above.")
+        print("NOTE: expected 5 captions per image; check the distribution above.")
     print(f"wrote {out}")
     return parsed
 
@@ -139,9 +139,10 @@ def main():
     p.add_argument("--root", required=True, help="folder with dataset_rsicd.json and the images")
     p.add_argument("--annotations", default=None, help="annotation json (default: <root>/dataset_rsicd.json)")
     p.add_argument("--out", default="data/rsicd/index.jsonl")
+    p.add_argument("--name", default="rsicd", help="dataset name stored in the index metadata")
     p.add_argument("--random-split", action="store_true", help="last resort, NOT comparable with papers")
     args = p.parse_args()
-    build_index(args.root, args.annotations, args.out, args.random_split)
+    build_index(args.root, args.annotations, args.out, args.random_split, name=args.name)
 
 
 if __name__ == "__main__":
