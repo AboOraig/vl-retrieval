@@ -1,5 +1,7 @@
 # Vision-Language Retrieval for Remote Sensing
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Contrastive image-text alignment of remote-sensing images and captions in a shared embedding space (CLIP-style
 dual encoder), evaluated for image-to-text and text-to-image retrieval, per scene class, and on datasets the model
 never saw during training.
