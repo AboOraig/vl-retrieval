@@ -87,7 +87,10 @@ CLIP fine-tuning baseline 27.4 mR, RemoteCLIP ViT-B/32 35.3 mR); those were not 
 protocols, so no ranking is claimed. Zero-shot scores on RSICD differ by about 0.7 mR depending on whether the OpenAI weights
 are loaded with the matching QuickGELU activation (the loader enforces it).
 
-**Per scene class (RSICD test; zero-shot vs the seed-0 8-block model; `analysis/report/per_scene.png`, `per_scene_table.md`).**
+**Per scene class (RSICD test; zero-shot vs the seed-0 8-block model)**
+![Per-scene class performance](analysis/report/per_scene.png)
+[View per-scene performance table](analysis/report/per_scene_table.md)
+
 Fine-tuning improved all 30 classes (gain +6.3 to +37.4 mR). Largest gains: church (+37.4), center (+29.7), railway station
 (+26.8), school (+25.3). Smallest: farmland (+6.3), port (+6.5), forest and baseball field (+8.3). After fine-tuning the best
 classes are center (56.9), church (47.6) and railway station (44.0); the worst are farmland (20.8), bareland (22.5) and bridge
